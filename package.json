@@ -1,0 +1,32 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "npm run development",
+        "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "watch": "npm run development -- --watch",
+        "watch-poll": "npm run watch -- --watch-poll",
+        "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --disable-host-check --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "prod": "npm run production",
+        "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "docker-init": "yarn && cp .env.docker.example .env && git submodule init && git submodule update && cd laradock && cp env-example .env && cd .. && yarn docker-adjust-pma-port && yarn docker-start && yarn docker-composer-install && yarn docker-fresh",
+        "docker-adjust-pma-port": "cd laradock && node -e \"const fs = require('fs'); var fp = './.env'; var d = fs.readFileSync(fp, {encoding:'utf8', flag:'r'}); var res = d.replace(/PMA_PORT=8081/g, 'PMA_PORT=8082'); fs.writeFileSync(fp, res);\"",
+        "docker-composer-install": "cd laradock && docker-compose exec --user=laradock workspace bash -c 'composer install'",
+        "docker-start": "cd laradock && docker-compose up -d nginx mysql phpmyadmin",
+        "docker-stop": "cd laradock && docker-compose stop",
+        "docker-status": "cd laradock && docker-compose ps",
+        "docker-delete": "cd laradock && docker-compose down",
+        "docker-bash": "cd laradock && docker-compose exec --user=laradock workspace bash",
+        "docker-migrate": "yarn docker-composer-install && cd laradock && docker-compose exec --user=laradock workspace bash -c 'php artisan migrate'",
+        "docker-fresh": "cd laradock && docker-compose exec --user=laradock workspace bash -c 'php artisan migrate:fresh --seed'",
+        "docker-fresh-composer": "yarn docker-composer-install && cd laradock && docker-compose exec --user=laradock workspace bash -c 'php artisan migrate:fresh --seed'",
+        "docker-refresh": "yarn docker-composer-install && cd laradock && docker-compose exec --user=laradock workspace bash -c 'php artisan migrate:refresh'",
+        "docker-test": "yarn docker-fresh && cd laradock && docker-compose exec --user=laradock workspace bash -c 'php ./vendor/bin/phpunit'"
+    },
+    "devDependencies": {
+        "axios": "^0.19",
+        "cross-env": "^7.0",
+        "laravel-mix": "^5.0.1",
+        "lodash": "^4.17.19",
+        "resolve-url-loader": "^3.1.0"
+    }
+}
